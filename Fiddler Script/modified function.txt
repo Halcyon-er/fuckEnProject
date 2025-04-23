@@ -1,0 +1,30 @@
+static function OnBeforeResponse(oSession: Session) {
+		if (oSession.uriContains("/comment/list") && oSession.oRequest.headers.HTTPMethod == "POST") {
+			oSession.utilDecodeRequest();
+			var reqBody = oSession.GetRequestBodyAsString();
+			var id = "unknown";
+
+			// 使用正则从 JSON 文本中提取 "id":数字
+            
+            var serializer = new System.Web.Script.Serialization.JavaScriptSerializer();
+            var jsonData = serializer.DeserializeObject(reqBody);
+
+            // 提取特定字段（例如 "id"）
+            id = jsonData["id"];
+
+			// 获取响应体
+			var resBody = oSession.GetResponseBodyAsString();
+			var folderPath = "E:\\fiddler_exports\\";
+			var filePath = folderPath + id + ".json";
+
+			// 写入文件
+			var fso = new ActiveXObject("Scripting.FileSystemObject");
+			if (!fso.FolderExists(folderPath)) {
+				fso.CreateFolder(folderPath);
+			}
+
+			var file = fso.CreateTextFile(filePath, true);
+			file.WriteLine(resBody);
+			file.Close();
+		}
+	}
